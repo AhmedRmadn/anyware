@@ -8,7 +8,17 @@ const announcementSchema = new mongoose.Schema(
     courseCode: String,
     createdAt: { type: Date, default: Date.now },
   },
-  { collection: "announcements" }
+  {
+    collection: "announcements",
+    toJSON: {
+      virtuals: true,
+      versionKey: false,
+      transform: (_, ret) => {
+        ret.id = ret._id.toString(); // add id as string
+        delete ret._id; // remove original _id
+      },
+    },
+  }
 );
 
 module.exports = mongoose.model("Announcement", announcementSchema);
