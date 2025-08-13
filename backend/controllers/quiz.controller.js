@@ -19,7 +19,6 @@ exports.getById = async (req, res) => {
 
 exports.getByInstructorId = async (req, res) => {
   const list = await service.getQuizzesByInstructorId(req.params.instructorId);
-  console.log(list);
   res.json(new ApiResponse(true, list, "Fetched quizzes for instructor"));
 };
 
@@ -30,7 +29,6 @@ exports.update = async (req, res) => {
 };
 
 exports.delete = async (req, res) => {
-  console.log(req);
   const deleted = await service.deleteQuiz(req.params.id);
   if (deleted)
     res.json(new ApiResponse(true, null, "Quiz deleted successfully"));
