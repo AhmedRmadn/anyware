@@ -159,6 +159,11 @@ npm start
 cd client
 npm run dev
 ```
+---
+**Important Note**
+- This submission **does not use TypeScript**.
+- This submission **does not include automated tests** (unit/integration).
+---
 👤 Author
 
 Ahmed Ramadan
