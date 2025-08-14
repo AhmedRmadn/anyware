@@ -48,28 +48,25 @@ export default function QuizForm({ onSubmit, courses, initialData, onCancel }) {
   };
 
   return (
-    <form className="bg-white p-4 rounded shadow mb-4" onSubmit={handleSubmit}>
-      {error && (
-        <p className="bg-red-100 text-red-700 p-2 rounded mb-3">{error}</p>
-      )}
+    <form className="quiz-form" onSubmit={handleSubmit}>
+      {error && <div className="form-error">{error}</div>}
 
-      <div className="mb-3">
-        <label className="block mb-1 font-semibold">Title</label>
+      <div className="form-group">
+        <label>Title</label>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
           required
+          placeholder="Enter quiz title"
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block mb-1 font-semibold">Course</label>
+      <div className="form-group">
+        <label>Course</label>
         <select
           value={courseCode}
           onChange={(e) => setCourseCode(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
           required
         >
           <option value="">Select a course</option>
@@ -81,21 +78,21 @@ export default function QuizForm({ onSubmit, courses, initialData, onCancel }) {
         </select>
       </div>
 
-      <div className="mb-3">
-        <label className="block mb-1 font-semibold">Duration (minutes)</label>
+      <div className="form-group">
+        <label>Duration (minutes)</label>
         <input
           type="number"
           value={duration}
           onChange={(e) => setDuration(e.target.value)}
-          className="w-full border px-3 py-2 rounded"
           min="1"
           max="120"
           required
+          placeholder="Enter duration in minutes"
         />
       </div>
 
-      <div className="mb-3">
-        <label className="block mb-1 font-semibold">Quiz Date & Time</label>
+      <div className="form-group">
+        <label>Quiz Date & Time</label>
         <DatePicker
           selected={quizTime}
           onChange={(date) => setQuizTime(date)}
@@ -103,23 +100,19 @@ export default function QuizForm({ onSubmit, courses, initialData, onCancel }) {
           timeFormat="HH:mm"
           timeIntervals={15}
           dateFormat="MMMM d, yyyy h:mm aa"
-          className="w-full border px-3 py-2 rounded"
           placeholderText="Select date & time"
         />
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="submit"
-          className="bg-green-500 text-white px-4 py-2 rounded"
-        >
-          Save
+      <div className="form-actions">
+        <button type="submit" className="form-action-btn save">
+          Save Quiz
         </button>
         {onCancel && (
           <button
             type="button"
             onClick={onCancel}
-            className="bg-gray-400 text-white px-4 py-2 rounded"
+            className="form-action-btn cancel"
           >
             Cancel
           </button>

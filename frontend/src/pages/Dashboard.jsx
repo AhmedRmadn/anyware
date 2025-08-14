@@ -1,95 +1,135 @@
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import { fetchAnnouncements } from "../store/slices/announcementSlice";
 import { fetchQuizzes } from "../store/slices/quizSlice";
-import { Link } from "react-router-dom";
+import { Box, Typography, Grid, Alert } from "@mui/material";
+import { Announcement, Quiz, TrendingUp, Schedule } from "@mui/icons-material";
+import StatCard from "../components/StatCard";
 import ResourceCard from "../components/ResourceCard";
+import SectionCard from "../components/SectionCard";
 
 export default function Dashboard() {
-  const { role, instructorData } = useSelector((s) => s.auth);
-  const { list: announcements } = useSelector((s) => s.announcements);
-  const { list: quizzes } = useSelector((s) => s.quizzes);
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const { role, instructorData } = useSelector((s) => s.auth);
+  const announcementsState = useSelector((s) => s.announcements);
+  const quizzesState = useSelector((s) => s.quizzes);
+
+  const {
+    list: announcements,
+    loading: aLoading,
+    error: aError,
+  } = announcementsState;
+  const { list: quizzes, loading: qLoading, error: qError } = quizzesState;
+
+  const isLoading = aLoading || qLoading;
+  const hasError = aError || qError;
 
   useEffect(() => {
-    dispatch(
-      fetchAnnouncements({ role, instructorId: instructorData?.id || null })
-    );
-    dispatch(fetchQuizzes({ role, instructorId: instructorData?.id || null }));
+    dispatch(fetchAnnouncements({ role, instructorId: instructorData?.id }));
+    dispatch(fetchQuizzes({ role, instructorId: instructorData?.id }));
   }, [role, instructorData, dispatch]);
 
   const now = new Date();
-
-  // Only active quizzes
-  const activeQuizzes = quizzes
-    .filter((q) => new Date(q.quizTime) >= now)
-    .sort((a, b) => new Date(a.quizTime) - new Date(b.quizTime));
-
-  // Latest announcements
+  const activeQuizzes = quizzes.filter((q) => new Date(q.quizTime) >= now);
   const recentAnnouncements = [...announcements]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 4);
 
+  if (hasError) {
+    return (
+      <Alert severity="error">
+        {t("common.error")}: {aError || qError}
+      </Alert>
+    );
+  }
+
   return (
-    <div>
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+    <Box>
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          {t("dashboard.title")}
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          {t("dashboard.welcome")}
+        </Typography>
+      </Box>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-6 mb-8">
-        <div className="bg-blue-100 p-6 rounded shadow">
-          <h2 className="text-lg font-semibold">Announcements</h2>
-          <p className="text-2xl font-bold">{announcements.length}</p>
-          <Link to="announcements" className="text-blue-600 underline">
-            View all
-          </Link>
-        </div>
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={Announcement}
+            value={announcements.length}
+            label={t("dashboard.totalAnnouncements")}
+            loading={isLoading}
+            link="announcements"
+            gradient="linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={Quiz}
+            value={quizzes.length}
+            label={t("dashboard.totalQuizzes")}
+            loading={isLoading}
+            link="quizzes"
+            gradient="linear-gradient(135deg, #f093fb 0%, #f5576c 100%)"
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            icon={TrendingUp}
+            value={activeQuizzes.length}
+            label={t("dashboard.upcoming")}
+            loading={isLoading}
+            link="quizzes"
+            gradient="linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)"
+          />
+        </Grid>
+      </Grid>
 
-        <div className="bg-green-100 p-6 rounded shadow">
-          <h2 className="text-lg font-semibold">Active Quizzes</h2>
-          <p className="text-2xl font-bold">{activeQuizzes.length}</p>
-          <Link to="quizzes" className="text-green-600 underline">
-            View all
-          </Link>
-        </div>
-      </div>
-
-      {/* Upcoming quizzes preview */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Upcoming Quizzes</h2>
-        {activeQuizzes.length > 0 ? (
-          activeQuizzes
-            .slice(0, 3)
-            .map((q) => (
+      {/* Content */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} lg={6}>
+          <SectionCard
+            icon={Schedule}
+            title={t("dashboard.upcomingQuizzes")}
+            items={activeQuizzes.slice(0, 3)}
+            loading={isLoading}
+            renderItem={(q) => (
               <ResourceCard
                 key={q.id}
                 title={q.title}
                 subtitle={`${q.courseCode} - ${q.instructorName}`}
-                extra={`${q.duration} min • ${new Date(
+                extra={`${q.duration} ${t("time.minutes")} • ${new Date(
                   q.quizTime
                 ).toLocaleString()}`}
               />
-            ))
-        ) : (
-          <p>No upcoming quizzes</p>
-        )}
-      </div>
-
-      {/* Recent announcements preview */}
-      <div>
-        <h2 className="text-xl font-semibold mb-4">Recent Announcements</h2>
-        {recentAnnouncements.length > 0 ? (
-          recentAnnouncements.map((a) => (
-            <ResourceCard
-              key={a.id}
-              title={a.message}
-              subtitle={`${a.courseCode} - ${a.instructorName}`}
-              extra={`Posted on ${new Date(a.createdAt).toLocaleString()}`}
-            />
-          ))
-        ) : (
-          <p>No announcements</p>
-        )}
-      </div>
-    </div>
+            )}
+          />
+        </Grid>
+        <Grid item xs={12} lg={6}>
+          <SectionCard
+            icon={Announcement}
+            title={t("dashboard.recentAnnouncements")}
+            items={recentAnnouncements}
+            loading={isLoading}
+            renderItem={(a) => (
+              <ResourceCard
+                key={a.id}
+                title={a.message}
+                subtitle={`${a.courseCode} - ${a.instructorName}`}
+                extra={`${t("time.posted")} ${new Date(
+                  a.createdAt
+                ).toLocaleString()}`}
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
+    </Box>
   );
 }

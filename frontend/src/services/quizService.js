@@ -30,6 +30,7 @@ export const updateQuiz = async (id, payload) => {
 };
 
 export const deleteQuiz = async (id) => {
+  console.log("Deleting quiz with id:", id); // debug log
   const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
   return res.json();
 };
